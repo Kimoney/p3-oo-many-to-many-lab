@@ -1,24 +1,42 @@
 from datetime import date
 
 class Author:
+
     def __init__(self, name):
         self.name = name
 
     def contracts(self):
-        pass
+        return [contract for contract in Contract.all if contract.author == self ]
+    
+    def books(self):
+        return [contract.book for contract in self.contracts()]
+    
+    def sign_contract(self, book, date, royalties):
+            return Contract(self, book, date, royalties)
 
+    def total_royalties(self):
+        return sum([contract.royalties for contract in self.contracts()])
 
 class Book:
+
     def __init__(self, title):
         self.title = title
 
+    def contracts(self):
+        return [contract for contract in Contract.all if contract.book == self]
+    
+    def authors(self):
+        return [contract.author for contract in self.contracts()]
+
 
 class Contract:
+    all = list()
     def __init__(self, author, book, date=date.today(), royalties=10):
         self.author = author
         self.book = book
         self.date = date
         self.royalties = royalties
+        Contract.all.append(self)
 
     @property
     def author(self):
@@ -27,7 +45,7 @@ class Contract:
     @author.setter
     def author(self, author):
         if not isinstance(author, Author):
-            raise Exception
+            raise Exception("Author not in db")
         self._author = author
 
     @property
@@ -59,3 +77,7 @@ class Contract:
         if type(royalties) != int:
             raise Exception
         self._royalties = royalties
+
+    @classmethod
+    def contracts_by_date(cls, date):
+        return [contract for contract in cls.all if contract._date == date]
